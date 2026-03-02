@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 const MongoStore = require('connect-mongo').default;
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -23,8 +22,6 @@ const store = MongoStore.create({
 	collectionName: 'sessions',
 });
 const csrfProtection = csrf();
-const privateKey = fs.readFileSync('server.key');
-const certificate = fs.readFileSync('server.cert');
 const fileStorage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, 'images');
