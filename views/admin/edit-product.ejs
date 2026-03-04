@@ -10,7 +10,8 @@
 			<% if (errorMessage) { %>
             <div class="user-message user-message--error"><%= errorMessage %></div>
         <% } %>
-        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype='multipart/form-data'>
+        <!-- <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype='multipart/form-data'> -->
+        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
             <div class="form-control">
                 <label for="title">Title</label>
                 <input class="<%= validationErrors.find(e=>e.path ==='title') ? 'invalid' : ' '  %>" type="text" name="title" id="title" value="<% if (editing || hasError) { %><%= product.title %><% } %>">
