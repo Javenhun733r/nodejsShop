@@ -43,7 +43,17 @@ const accessLogStream = fs.createWriteStream(
 	path.join(__dirname, 'access.log'),
 	{ flags: 'a' },
 );
-app.use(helmet());
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				...helmet.contentSecurityPolicy.getDefaultDirectives(),
+				'script-src': ["'self'", "'unsafe-inline'"],
+				'script-src-attr': ["'unsafe-inline'"],
+			},
+		},
+	}),
+);
 app.use(compression());
 app.use(morgan('combined', { stream: accessLogStream }));
 const fileFilter = (req, file, cb) => {
@@ -73,11 +83,7 @@ app.use(
 );
 app.use(csrfProtection);
 app.use(flash());
-app.use((req, res, next) => {
-	res.locals.isAuthenticated = req.session ? req.session.isLoggedIn : false;
-	res.locals.csrfToken = req.csrfToken();
-	next();
-});
+
 app.use((req, res, next) => {
 	if (!req.session.user) {
 		return next();
@@ -91,17 +97,22 @@ app.use((req, res, next) => {
 			next();
 		})
 		.catch(err => {
-			next(new Error(err));
+			console.log('Error loading user:', err);
+			next();
 		});
 });
-
+app.use((req, res, next) => {
+	res.locals.isAuthenticated = req.session ? req.session.isLoggedIn : false;
+	res.locals.csrfToken = req.csrfToken();
+	next();
+});
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 app.get('/500', errorController.get500);
 app.use(errorController.get404);
 app.use((error, req, res, next) => {
-	const isAuth = req.session ? req.session.isLoggedIn : false;
+	const isAuth = !!(req.session && req.session.isLoggedIn);
 	res.status(500).render('500', {
 		pageTitle: 'Error!',
 		path: '/500',
